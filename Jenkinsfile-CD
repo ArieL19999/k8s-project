@@ -36,8 +36,8 @@ pipeline {
         
         stage('upgrade helm charts') {
             steps {
-                 sh '/home/jenkins/agent/workspace/big-CD/helm upgrade producer ./producer --install'
-                 sh '/home/jenkins/agent/workspace/big-CD/helm upgrade consumer ./consumer --install'
+                 sh '/home/jenkins/agent/workspace/big-CD/helm upgrade producer ./producer '
+                 sh '/home/jenkins/agent/workspace/big-CD/helm upgrade consumer ./consumer '
             }
         }
     }
