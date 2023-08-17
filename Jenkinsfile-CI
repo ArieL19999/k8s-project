@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Hello') {
+            steps {
+                git credentialsId: 'git', url: 'https://github.com/avielb/rmqp-example.git'
+            }
+        }
+        
+        stage("build producer image") {
+            steps {
+                bat 'dir'
+                bat 'cd C:/Users/eitan/.jenkins/workspace/OT/producer && docker build -t pnb20/prod:v1 -f Dockerfile .'
+            }
+        }
+        
+        stage("build consumer image") {
+            steps {
+                bat 'cd C:/Users/eitan/.jenkins/workspace/OT/consumer && docker build -t pnb20/consumer:v1 -f Dockerfile .'
+                bat 'dir'
+            }
+        }
+        
+        stage("push images") {
+            steps {
+                script {
+                    def dockerHubCredentials = 'docker-cred' 
+                    docker.withRegistry("https://index.docker.io/v1/", dockerHubCredentials) {
+                        docker.image('pnb20/prod:v1').push()
+                        docker.image('pnb20/consumer:v1').push()
+                    }
+                }
+            }
+        }
+    }
+}
