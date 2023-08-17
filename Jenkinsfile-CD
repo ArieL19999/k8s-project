@@ -1,0 +1,44 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+                apiVersion: v1
+                kind: Pod
+                spec:
+                  containers:
+                  - name: ubuntu
+                    image: ubuntu:latest
+                    command:
+                    - cat
+                    tty: true
+            '''
+        }
+    }
+    
+    stages {
+        
+        stage('Checkout Helm Charts') {
+            steps {
+                git branch: 'main', credentialsId: 'git', url: 'https://github.com/ArieL19999/helm-charts.git'
+            }
+        }
+        
+        stage("install helm"){
+            steps {
+                
+                sh 'curl -LO https://get.helm.sh/helm-v3.6.1-linux-amd64.tar.gz'
+                sh 'tar -xvzf helm-v3.6.1-linux-amd64.tar.gz'
+                sh 'mv linux-amd64/helm /home/jenkins/agent/workspace/big-CD/'
+                sh 'chmod +x /home/jenkins/agent/workspace/big-CD/helm'
+                sh '/home/jenkins/agent/workspace/big-CD/helm version'
+            }
+        }
+        
+        stage('upgrade helm charts') {
+            steps {
+                 sh '/home/jenkins/agent/workspace/big-CD/helm upgrade producer ./producer --install'
+                 sh '/home/jenkins/agent/workspace/big-CD/helm upgrade consumer ./consumer --install'
+            }
+        }
+    }
+}
